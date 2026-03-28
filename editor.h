@@ -4,25 +4,69 @@
 #include <stdio.h>
 #include "structs.h"
 
-// imprime todo o conteÃºdo do editor
 void imprimirEditor(DescLinhas *d) {
-    if (d == NULL || d->inicio == NULL) {
-        printf("Editor vazio\n");
-        return;
-    }
-
-    Linhas *linha = d->inicio;
-
-    while (linha != NULL) {
-        Letra *letra = linha->inicioL;
-
-        while (letra != NULL) {
-            printf("%c", letra->letra);
-            letra = letra->prox;
+    if (d != NULL && d->inicio != NULL) {
+        Linhas *lin = d->inicio;
+        while (lin != NULL) {
+            Letra *let = lin->inicioL;
+            while (let != NULL) {
+                printf("%c", let->letra);
+                let = let->prox;
+            }
+            printf("\n");
+            lin = lin->botton;
         }
+    } else {
+        printf("Editor sem conteudo.\n");
+    }
+}
 
-        printf("\n");
-        linha = linha->botton;
+// Formatacao do F5 (para haver recuo(modificacao na estrutura do DescLinhas))
+void exibirFormatado(DescLinhas *d) {
+    if (d != NULL && d->inicio != NULL) {
+        Linhas *lin = d->inicio;
+        int novoParagrafo = 1; 
+        int i;
+
+        while (lin != NULL) {
+            Letra *let = lin->inicioL;
+            Letra *ultima = NULL;
+            int colAtual = 0; // Começamos a contar do zero em cada linha
+
+            // 1. Recuo Esquerdo base para todas as linhas 
+            for (i = 0; i < d->recuoEsq; i++) {
+                printf(" ");
+                colAtual++;
+            }
+
+            // 2. Recuo extra apenas se for início de parágrafo 
+            if (novoParagrafo == 1) {
+                for (i = 0; i < d->primLinha; i++) {
+                    printf(" ");
+                    colAtual++;
+                }
+                novoParagrafo = 0;
+            }
+
+            // 3. Imprime as letras respeitando o limite da coluna 
+            while (let != NULL && colAtual < d->recuoDir) {
+                printf("%c", let->letra);
+                ultima = let;
+                let = let->prox;
+                colAtual++;
+            }
+            printf("\n");
+
+            // 4. Verifica pontuação para definir o próximo paragrafo 
+            if (ultima != NULL) {
+                if (ultima->letra == '.' || ultima->letra == '!' || ultima->letra == '?') {
+                    novoParagrafo = 1;
+                }
+            }
+            lin = lin->botton;
+        }
+    } else {
+        printf("\nO editor nao possui texto carregado.\n");
     }
 }
 

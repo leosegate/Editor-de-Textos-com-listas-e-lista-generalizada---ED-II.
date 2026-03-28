@@ -1,50 +1,130 @@
-/* [LISTA A SER REALIZADA] ï¿½ï¿½ï¿½ [TEMPO TOTAL = 21:32 A ]
-//[]home = ï¿½ coloca o cursor no inï¿½cio da linha corrente (dada pelo ponteiro linha)
-//[]End ï¿½ coloca o cursor no final da linha corrente (dada pelo ponteiro linha);
-//[]Page Up ï¿½ rolagem de uma tela para cima;
-//[]Page Down ï¿½ rolagem de uma tela para baixo;
-//[]Back Space ï¿½ apaga um caracter (ï¿½ esquerda do cursor);
-//[]Del ï¿½ apaga um caracter (sob o cursor);
-//[]Insert ï¿½ ligado: Insere novos caracteres; desligado: escreve em cima dos caracteres existentes.
-//[]F10 ï¿½ Negrito: o caracter ï¿½ (21 da tabela ASCII) indica inï¿½cio ou fim de uma palavra ou trecho em Negrito. 
-
-//[]F2 Abrir: Uma funï¿½ï¿½o para ler do arquivo texto e carregar para a estrutura do editor (para efeito de simplificaï¿½ï¿½o, cada linha do arquivo nï¿½o deverï¿½ ser maior que 79 caracteres)
-//[]F3 Salvar: Uma funï¿½ï¿½o para percorrer toda a estrutura do editor e gravar no arquivo texto;
-//[]F5 Exibir: Uma funï¿½ï¿½o para exibir o texto na tela a partir da estrutura do editor (listas dinï¿½micas) de maneira formatada de acordo com a configuraï¿½ï¿½o prï¿½via: Primeira Linha, Recuo Esquerdo e Recuo Direito;
-
-//[]Uma funï¿½ï¿½o para buscar na lista generalizada de palavras
-//[]Uma funï¿½ï¿½o para inserir na lista generalizada de palavras
-
-//[]verificar a funï¿½ï¿½o AUTO COMPLETAR NO FINAL DO PDF
-
-
-[===   OBSERVAï¿½ï¿½ES NECESSï¿½RIAS PARA O FUNCIONAMENTO   ===]
-// NO MAXIMO 79 CARACTERES POR LINHA!!!
-// FINAL DA LINHA ï¿½ FEITO POR "." "!" OU "?"
-// SE A PALAVRA PASSAR DO TAMANHO LIMITE, ELE DEVE SER INSERIDO NA LINHA DE BAIXO
-*/
-
-
 #include <stdio.h>
+#include <conio.h> 
+#include <windows.h>
+#include "structs.h"
+#include "funcoes.h"
 #include "manipular_arquivo.h"
 #include "editor.h"
 
-int main() {
-    char nomeArquivo[100];
 
-    printf("Digite o nome do arquivo (ex: texto.txt): ");
-    scanf("%s", nomeArquivo);
+void escolha(int tecla, DescLinhas **d) {
+    char nomeArq[100];
 
-    DescLinhas *desc = lerArquivoTXT(nomeArquivo);
+    // F2 - Abrir
+    if (tecla == 60) { 
+        printf("\nNome do Arquivo para abrir: ");
+        scanf("%s", nomeArq);
+        fflush(stdin);
 
-    if (desc == NULL) {
-        printf("Erro ao ler arquivo.\n");
-        return 1;
+        // Limpa a memoria do que existia antes
+        freeLetrasDoEditor(*d); 
+        
+        DescLinhas *temp = lerArquivoTXT(nomeArq);
+        if (temp != NULL) {
+            free(*d); // Libera o descritor antigo
+            *d = temp; // O ponteiro do main agora aponta para o novo arquivo
+            printf("\nArquivo carregado com sucesso!");
+        } else {
+            printf("\nErro ao carregar arquivo.");
+        }
+        Sleep(600);
     }
 
-    printf("\n===== CONTEUDO DO EDITOR =====\n\n");
+    // F3 - Salvar
+    if (tecla == 61) { 
+        printf("\nNome do Arquivo para salvar: ");
+        scanf("%s", nomeArq);
+        fflush(stdin);
+        salvarArquivoTXT(nomeArq, *d);
+        printf("\nSalvo!");
+        Sleep(600);
+    }
 
-    imprimirEditor(desc);
-    getch();
+    // F5 - Exibir 
+    if (tecla == 63) { 
+        system("cls");
+        printf("--- Configuracao dos Paragrafos ---\n");
+        fflush(stdin);
+        
+       
+        printf("Primeira Linha (espacos): ");
+        scanf("%d", &((*d)->primLinha));
+        
+        printf("Recuo Esquerdo (espacos): ");
+        scanf("%d", &((*d)->recuoEsq));
+        
+        printf("Recuo Direito (coluna): ");
+        scanf("%d", &((*d)->recuoDir));
+        
+        fflush(stdin);
+        
+        printf("--- EXIBICAO FORMATADA ---\n\n");
+        // Chama a função de exibição passando o conteudo do ponteiro
+        exibirFormatado(*d);
+        printf("-----------------------------------------------------------------");
+        printf("\nPressione qualquer tecla para voltar...");
+        getch();
+    }
+
+    // F10 - Negrito (colocar ele como uma tecla própria, seguir exemplo do desenho do trab
+    if (tecla == 68) { 
+        digitarCaractere(*d, (char)21); 
+    }
+}
+int main() {
+    DescLinhas *meuEditor = criarDescritor();
+    int tecla = 0;
+    int continuar = 1;
+
+    if (meuEditor != NULL) {
+        // Inicia com uma linha vazia para digitação
+        inserirLinha(meuEditor, linhaEmBranco());
+
+        while (continuar == 1) {
+            system("cls");
+            printf("--- EDITOR DE TEXTO (FIPP) ---\n");
+            printf("| F2: Abrir | F3: Salvar | F4: Sair | F5: Exibir | F10: Negrito |\n");
+            printf("-----------------------------------------------------------------\n");
+            
+            imprimirEditor(meuEditor);
+            
+            tecla = getch();
+
+            // Teclas de Funcao e Setas
+            if (tecla == 0 || tecla == 224) {
+                tecla = getch();
+                    
+                if (tecla == 62) { // F4 para sair
+                    continuar = 0;
+                } else {
+                    escolha(tecla, &meuEditor);
+                }    
+            } 
+            
+			else {
+                // Tecla ESC para sair
+                if (tecla == 27) {
+                    continuar = 0;
+                } 
+                // Tecla ENTER
+                else 
+					if (tecla == 13) {
+                    	inserirLinha(meuEditor, linhaEmBranco());
+                	} 
+                // Backspace (ta apagando)
+                else 
+					if (tecla == 8) {
+                    	apagarUltimoCaractere(meuEditor);
+                }
+				 
+                // Caracteres normais
+                else 
+					if (tecla >= 32 && tecla <= 255) {
+                    	digitarCaractere(meuEditor, (char)tecla);
+                	}
+            }
+        }
+		freeAll(&meuEditor);
+    }
     return 0;
 }

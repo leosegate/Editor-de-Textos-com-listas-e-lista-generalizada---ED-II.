@@ -6,47 +6,67 @@
 #include "structs.h"
 #include "funcoes.h"
 
-// cria descritor vazio
 DescLinhas* criarDescritor() {
-    DescLinhas *d = (DescLinhas*) malloc(sizeof(DescLinhas));
-    if (!d) return NULL;
-
-    d->inicio = NULL;
-    d->qntdLinhas = 0;
-
+    DescLinhas *d = (DescLinhas*)malloc(sizeof(DescLinhas));
+    if (d != NULL) {
+        d->inicio = NULL;
+        d->qntdLinhas = 0;
+    }
     return d;
 }
 
-// FUNÇÃO PRINCIPAL: lê arquivo txt e monta estrutura
 DescLinhas* lerArquivoTXT(const char *nomeArquivo) {
     FILE *f = fopen(nomeArquivo, "r");
-    if (!f) {
-        printf("Erro ao abrir arquivo\n");
-        return NULL;
-    }
+    DescLinhas *desc = NULL;
 
-    DescLinhas *desc = criarDescritor();
-    if (!desc) {
-        fclose(f);
-        return NULL;
-    }
-
-    char linhaTexto[80]; // respeitando limite do trabalho (79 + \0)
-
-    while (fgets(linhaTexto, sizeof(linhaTexto), f)) {
-		int i;
-        Linhas *novaLinha = linhaEmBranco();
-        if (!novaLinha) continue;
-
-        for (i = 0; linhaTexto[i] != '\0' && linhaTexto[i] != '\n'; i++) {
-            inserirLetra(novaLinha, linhaTexto[i]);
+    if (f != NULL) {
+        desc = criarDescritor();
+        if (desc != NULL) {
+            char buffer[81]; 
+            while (fgets(buffer, sizeof(buffer), f)) {
+                Linhas *nova = linhaEmBranco();
+                if (nova != NULL) {
+                    int i = 0;
+                    while (buffer[i] != '\0' && buffer[i] != '\n' && i < 79) {
+                        inserirLetra(nova, buffer[i]);
+                        i++;
+                    }
+                    inserirLinha(desc, nova);
+                }
+            }
         }
-
-        inserirLinha(desc, novaLinha);
+        fclose(f);
+    } else {
+        printf("Arquivo %s nao encontrado.\n", nomeArquivo);
     }
-
-    fclose(f);
     return desc;
+}
+
+void salvarArquivoTXT(const char *nomeArquivo, DescLinhas *d) {
+    if (d != NULL) {
+        FILE *f = fopen(nomeArquivo, "w");
+        
+        if (f != NULL) {
+            Linhas *lin = d->inicio;
+            
+            while (lin != NULL) {
+                Letra *let = lin->inicioL;
+                
+                while (let != NULL) {
+                    fprintf(f, "%c", let->letra);
+                    let = let->prox;
+                }
+                
+                fprintf(f, "\n");
+                lin = lin->botton;
+            }
+            
+            fclose(f);
+            printf("\nArquivo salvo com sucesso!");
+        } else {
+            printf("\nErro ao criar o arquivo para salvar.");
+        }
+    }
 }
 
 #endif
