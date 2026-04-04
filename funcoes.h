@@ -4,9 +4,9 @@
 #include <stdlib.h>
 #include "structs.h"
 
-// --- Limpeza de Memória ---
+// --- Limpeza de Memï¿½ria ---
 
-void freeLetras(Linhas* L) {
+void freeLetras(Linha* L) {
     if (L != NULL) {
         Letra *aux = L->inicioL;
         while (aux != NULL) {
@@ -18,7 +18,7 @@ void freeLetras(Linhas* L) {
     }
 }
 
-void freeLinha(Linhas** L) {
+void freeLinha(Linha** L) {
     if (*L != NULL) {
         freeLetras(*L);
         free(*L);
@@ -28,9 +28,9 @@ void freeLinha(Linhas** L) {
 
 void freeAll(DescLinhas** d) {
     if (*d != NULL) {
-        Linhas *aux = (*d)->inicio;
+        Linha *aux = (*d)->inicio;
         while (aux != NULL) {
-            Linhas *proxima = aux->botton;
+            Linha *proxima = aux->botton;
             freeLinha(&aux);
             aux = proxima;
         }
@@ -39,10 +39,10 @@ void freeAll(DescLinhas** d) {
     }
 }
 
-// --- Criação e Inserção ---
+// --- Criaï¿½ï¿½o e Inserï¿½ï¿½o ---
 
-Linhas* linhaEmBranco() {
-    Linhas *nova = (Linhas*)malloc(sizeof(Linhas));
+Linha* linhaEmBranco() {
+    Linha *nova = (Linha*)malloc(sizeof(Linha));
     if (nova != NULL) {
         nova->botton = NULL;
         nova->top = NULL;
@@ -62,11 +62,11 @@ Letra* criarLetra(char c) {
     return nova;
 }
 
-void inserirLinha(DescLinhas *d, Linhas *nova) {
+void inserirLinha(DescLinhas *d, Linha *nova) {
     if (d->inicio == NULL) {
         d->inicio = nova;
     } else {
-        Linhas *aux = d->inicio;
+        Linha *aux = d->inicio;
         while (aux->botton != NULL) {
             aux = aux->botton;
         }
@@ -76,7 +76,7 @@ void inserirLinha(DescLinhas *d, Linhas *nova) {
     d->qntdLinhas++;
 }
 
-void inserirLetra(Linhas *linha, char c) {
+void inserirLetra(Linha *linha, char c) {
     Letra *nova = criarLetra(c);
     if (nova != NULL) {
         if (linha->inicioL == NULL) {
@@ -95,7 +95,7 @@ void inserirLetra(Linhas *linha, char c) {
 
 void digitarCaractere(DescLinhas *d, char c) {
     if (d != NULL) {
-        Linhas *atual = d->inicio;
+        Linha *atual = d->inicio;
         
         // 1. Navega ate a ultima linha
         if (atual != NULL) {
@@ -106,7 +106,7 @@ void digitarCaractere(DescLinhas *d, char c) {
 
         // 2. Verifica se a linha atual estourou o limite de 79 caracteres
         if (atual == NULL || atual->nro >= 79) {
-            Linhas *nova = linhaEmBranco();
+            Linha *nova = linhaEmBranco();
             if (nova != NULL) {
                 inserirLinha(d, nova);
                 atual = nova;
@@ -123,11 +123,11 @@ void digitarCaractere(DescLinhas *d, char c) {
 }
 void freeLetrasDoEditor(DescLinhas *d) {
     if (d != NULL) {
-        Linhas *aux = d->inicio;
+        Linha *aux = d->inicio;
         
         // Percorre todas as linhas
         while (aux != NULL) {
-            Linhas *proximaLinha = aux->botton;
+            Linha *proximaLinha = aux->botton;
             
             // Limpa as letras da linha atual 
             freeLetras(aux);
@@ -146,7 +146,7 @@ void freeLetrasDoEditor(DescLinhas *d) {
 
 void apagarUltimoCaractere(DescLinhas *d) {
     if (d != NULL && d->inicio != NULL) {
-        Linhas *atual = d->inicio;
+        Linha *atual = d->inicio;
         
         // 1. Navega ate a ultima linha
         while (atual->botton != NULL) {
@@ -175,7 +175,7 @@ void apagarUltimoCaractere(DescLinhas *d) {
         } else {
             // 3. Se a linha estiver vazia, removemos a linha (se n for a unica)
             if (atual->top != NULL) {
-                Linhas *anterior = atual->top;
+                Linha *anterior = atual->top;
                 anterior->botton = NULL;
                 free(atual);
                 d->qntdLinhas--;

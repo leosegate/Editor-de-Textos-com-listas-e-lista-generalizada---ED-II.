@@ -6,17 +6,17 @@ typedef struct charS {
     struct charS *ant, *prox;
 } Letra;
 
-typedef struct linhas {
+typedef struct linha {
     struct linhas *top, *botton;
     int nro; // qntd de letras na linha
     Letra *inicioL;
-} Linhas;
+} Linha;
 
 typedef struct descritor_editor {
-    Linhas *inicio;
+    Linha *inicio;
     int qntdLinhas;
-    int primLinha;   // use: 15 espaços
-    int recuoEsq;    // use: 5 espaços
+    int primLinha;   // use: 15 espaï¿½os
+    int recuoEsq;    // use: 5 espaï¿½os
     int recuoDir;    // use: 75 (limite da coluna)
 } DescLinhas;
 

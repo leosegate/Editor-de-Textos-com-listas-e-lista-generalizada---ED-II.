@@ -6,7 +6,7 @@
 
 void imprimirEditor(DescLinhas *d) {
     if (d != NULL && d->inicio != NULL) {
-        Linhas *lin = d->inicio;
+        Linha *lin = d->inicio;
         while (lin != NULL) {
             Letra *let = lin->inicioL;
             while (let != NULL) {
@@ -24,14 +24,14 @@ void imprimirEditor(DescLinhas *d) {
 // Formatacao do F5 (para haver recuo(modificacao na estrutura do DescLinhas))
 void exibirFormatado(DescLinhas *d) {
     if (d != NULL && d->inicio != NULL) {
-        Linhas *lin = d->inicio;
+        Linha *lin = d->inicio;
         int novoParagrafo = 1; 
         int i;
 
         while (lin != NULL) {
             Letra *let = lin->inicioL;
             Letra *ultima = NULL;
-            int colAtual = 0; // Começamos a contar do zero em cada linha
+            int colAtual = 0; // Comeï¿½amos a contar do zero em cada linha
 
             // 1. Recuo Esquerdo base para todas as linhas 
             for (i = 0; i < d->recuoEsq; i++) {
@@ -39,7 +39,7 @@ void exibirFormatado(DescLinhas *d) {
                 colAtual++;
             }
 
-            // 2. Recuo extra apenas se for início de parágrafo 
+            // 2. Recuo extra apenas se for inï¿½cio de parï¿½grafo 
             if (novoParagrafo == 1) {
                 for (i = 0; i < d->primLinha; i++) {
                     printf(" ");
@@ -57,7 +57,7 @@ void exibirFormatado(DescLinhas *d) {
             }
             printf("\n");
 
-            // 4. Verifica pontuação para definir o próximo paragrafo 
+            // 4. Verifica pontuaï¿½ï¿½o para definir o prï¿½ximo paragrafo 
             if (ultima != NULL) {
                 if (ultima->letra == '.' || ultima->letra == '!' || ultima->letra == '?') {
                     novoParagrafo = 1;

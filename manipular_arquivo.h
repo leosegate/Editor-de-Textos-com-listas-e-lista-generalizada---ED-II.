@@ -24,7 +24,7 @@ DescLinhas* lerArquivoTXT(const char *nomeArquivo) {
         if (desc != NULL) {
             char buffer[81]; 
             while (fgets(buffer, sizeof(buffer), f)) {
-                Linhas *nova = linhaEmBranco();
+                Linha *nova = linhaEmBranco();
                 if (nova != NULL) {
                     int i = 0;
                     while (buffer[i] != '\0' && buffer[i] != '\n' && i < 79) {
@@ -47,7 +47,7 @@ void salvarArquivoTXT(const char *nomeArquivo, DescLinhas *d) {
         FILE *f = fopen(nomeArquivo, "w");
         
         if (f != NULL) {
-            Linhas *lin = d->inicio;
+            Linha *lin = d->inicio;
             
             while (lin != NULL) {
                 Letra *let = lin->inicioL;
