@@ -7,7 +7,7 @@ typedef struct charS {
 } Letra;
 
 typedef struct linha {
-    struct linhas *top, *botton;
+    struct linha *top, *botton;
     int nro; // qntd de letras na linha
     Letra *inicioL;
 } Linha;

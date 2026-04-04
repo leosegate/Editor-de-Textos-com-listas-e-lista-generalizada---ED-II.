@@ -29,8 +29,9 @@ void freeLinha(Linha** L) {
 void freeAll(DescLinhas** d) {
     if (*d != NULL) {
         Linha *aux = (*d)->inicio;
+        Linha *proxima;
         while (aux != NULL) {
-            Linha *proxima = aux->botton;
+            proxima = aux->botton;
             freeLinha(&aux);
             aux = proxima;
         }
@@ -60,6 +61,37 @@ Letra* criarLetra(char c) {
         nova->prox = NULL;
     }
     return nova;
+}
+
+void inserirChar(Cursor *cursor, char ch) {
+    Letra *nova = criarLetra(ch);
+
+    if (cursor->linha->inicioL == NULL) {
+        cursor->linha->inicioL = nova;
+        cursor->letra = nova;
+    }
+    
+    else if (cursor->letra == NULL) {
+        nova->prox = cursor->linha->inicioL;
+        cursor->linha->inicioL->ant = nova;
+        cursor->linha->inicioL = nova;
+        cursor->letra = nova;
+    }
+    
+    else {
+        nova->prox = cursor->letra->prox;
+        nova->ant = cursor->letra;
+
+        if (cursor->letra->prox != NULL) {
+            cursor->letra->prox->ant = nova;
+        }
+
+        cursor->letra->prox = nova;
+        cursor->letra = nova;
+    }
+
+    cursor->col++;
+    cursor->linha->nro++;   
 }
 
 void inserirLinha(DescLinhas *d, Linha *nova) {
@@ -213,5 +245,65 @@ void inserirNaListaG(NoPalavra **raiz, char *palavra) {
         }
     }
 }
+
+void moverEsquerda(Cursor *c) {
+    if (c->letra != NULL) {
+        c->letra = c->letra->ant;
+        c->col--;
+    }
+}
+
+void moverDireita(Cursor *c) {
+    // se cursor está antes do primeiro caractere
+    if (c->letra == NULL) {
+        if (c->linha->inicioL != NULL) {
+            c->letra = c->linha->inicioL;
+            c->col++;
+        }
+    }
+    // se tem próximo
+    else if (c->letra->prox != NULL) {
+        c->letra = c->letra->prox;
+        c->col++;
+    }
+}
+
+Letra* irParaColuna(Linha *linha, int col) {
+    Letra *aux = linha->inicioL;
+
+    int i = 0;
+    Letra *anterior = NULL;
+
+    while (aux != NULL && i < col) {
+        anterior = aux;
+        aux = aux->prox;
+        i++;
+    }
+
+    return anterior; // retorna a letra à esquerda da coluna
+}
+
+void moverCima(Cursor *c) {
+    if (c->linha->top == NULL) return;
+
+    c->linha = c->linha->top;
+
+    if (c->col > c->linha->nro)
+        c->col = c->linha->nro;
+
+    c->letra = irParaColuna(c->linha, c->col);
+}
+
+void moverBaixo(Cursor *c) {
+    if (c->linha->botton == NULL) return;
+
+    c->linha = c->linha->botton;
+
+    if (c->col > c->linha->nro)
+        c->col = c->linha->nro;
+
+    c->letra = irParaColuna(c->linha, c->col);
+}
+
 
 #endif

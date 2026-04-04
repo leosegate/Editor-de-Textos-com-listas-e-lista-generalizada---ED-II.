@@ -1,13 +1,19 @@
 #include <stdio.h>
-#include <conio.h> 
+#include <conio.h>
 #include <windows.h>
 #include "structs.h"
 #include "funcoes.h"
 #include "manipular_arquivo.h"
 #include "editor.h"
 
+// ================= FUNÃ‡Ã•ES =================
+void resetarCursor(Cursor *c, DescLinhas *d) {
+    c->linha = d->inicio;
+    c->letra = NULL;
+    c->col = 0;
+}
 
-void escolha(int tecla, DescLinhas **d) {
+void escolha(int tecla, DescLinhas **d, Cursor *cursor) {
     char nomeArq[100];
 
     // F2 - Abrir
@@ -16,13 +22,15 @@ void escolha(int tecla, DescLinhas **d) {
         scanf("%s", nomeArq);
         fflush(stdin);
 
-        // Limpa a memoria do que existia antes
         freeLetrasDoEditor(*d); 
         
         DescLinhas *temp = lerArquivoTXT(nomeArq);
         if (temp != NULL) {
-            free(*d); // Libera o descritor antigo
-            *d = temp; // O ponteiro do main agora aponta para o novo arquivo
+            free(*d);
+            *d = temp;
+
+            resetarCursor(cursor, *d);
+
             printf("\nArquivo carregado com sucesso!");
         } else {
             printf("\nErro ao carregar arquivo.");
@@ -35,18 +43,19 @@ void escolha(int tecla, DescLinhas **d) {
         printf("\nNome do Arquivo para salvar: ");
         scanf("%s", nomeArq);
         fflush(stdin);
+
         salvarArquivoTXT(nomeArq, *d);
+
         printf("\nSalvo!");
         Sleep(600);
     }
 
-    // F5 - Exibir 
+    // F5 - Exibir formatado
     if (tecla == 63) { 
         system("cls");
+
         printf("--- Configuracao dos Paragrafos ---\n");
-        fflush(stdin);
-        
-       
+
         printf("Primeira Linha (espacos): ");
         scanf("%d", &((*d)->primLinha));
         
@@ -56,75 +65,95 @@ void escolha(int tecla, DescLinhas **d) {
         printf("Recuo Direito (coluna): ");
         scanf("%d", &((*d)->recuoDir));
         
-        fflush(stdin);
-        
-        printf("--- EXIBICAO FORMATADA ---\n\n");
-        // Chama a função de exibição passando o conteudo do ponteiro
+        printf("\n--- EXIBICAO FORMATADA ---\n\n");
+
         exibirFormatado(*d);
-        printf("-----------------------------------------------------------------");
+
+        printf("\n-----------------------------------------------------------------");
         printf("\nPressione qualquer tecla para voltar...");
         getch();
     }
 
-    // F10 - Negrito (colocar ele como uma tecla própria, seguir exemplo do desenho do trab
+    // F10 - Negrito (placeholder)
     if (tecla == 68) { 
-        digitarCaractere(*d, (char)21); 
+        inserirChar(cursor, (char)21);
     }
 }
+
+// ================= MAIN =================
 int main() {
     DescLinhas *meuEditor = criarDescritor();
+    Cursor cursor;
+
     int tecla = 0;
     int continuar = 1;
 
     if (meuEditor != NULL) {
-        // Inicia com uma linha vazia para digitação
+
         inserirLinha(meuEditor, linhaEmBranco());
+
+        resetarCursor(&cursor, meuEditor);
 
         while (continuar == 1) {
             system("cls");
+
             printf("--- EDITOR DE TEXTO (FIPP) ---\n");
             printf("| F2: Abrir | F3: Salvar | F4: Sair | F5: Exibir | F10: Negrito |\n");
             printf("-----------------------------------------------------------------\n");
-            
-            imprimirEditor(meuEditor);
-            
+
+            imprimirEditor(meuEditor, &cursor);
+
             tecla = getch();
 
-            // Teclas de Funcao e Setas
+            // TECLAS ESPECIAIS
             if (tecla == 0 || tecla == 224) {
                 tecla = getch();
-                    
-                if (tecla == 62) { // F4 para sair
-                    continuar = 0;
-                } else {
-                    escolha(tecla, &meuEditor);
-                }    
-            } 
-            
-			else {
-                // Tecla ESC para sair
-                if (tecla == 27) {
-                    continuar = 0;
-                } 
-                // Tecla ENTER
-                else 
-					if (tecla == 13) {
-                    	inserirLinha(meuEditor, linhaEmBranco());
-                	} 
-                // Backspace (ta apagando)
-                else 
-					if (tecla == 8) {
-                    	apagarUltimoCaractere(meuEditor);
+
+                switch (tecla) {
+                    case 75: // â†
+                        moverEsquerda(&cursor);
+                        break;
+
+                    case 77: // â†’
+                        moverDireita(&cursor);
+                        break;
+
+                    case 72: // â†‘
+                        moverCima(&cursor);
+                        break;
+
+                    case 80: // â†“
+                        moverBaixo(&cursor);
+                        break;
+
+                    case 62: // F4
+                        continuar = 0;
+                        break;
+
+                    default:
+                        escolha(tecla, &meuEditor, &cursor);
                 }
-				 
-                // Caracteres normais
-                else 
-					if (tecla >= 32 && tecla <= 255) {
-                    	digitarCaractere(meuEditor, (char)tecla);
-                	}
+            }
+
+            // TECLAS NORMAIS
+            else {
+                if (tecla == 27) { // ESC
+                    continuar = 0;
+                }
+                else if (tecla == 13) { // ENTER
+                    //quebrarLinha(&cursor, meuEditor);
+                }
+                else if (tecla == 8) { // BACKSPACE
+                    //removerChar(&cursor);
+                }
+                else if (tecla >= 32 && tecla <= 255) {
+                    inserirChar(&cursor, (char)tecla);
+                }
             }
         }
-		freeAll(&meuEditor);
+
+        freeAll(&meuEditor);
     }
+
     return 0;
 }

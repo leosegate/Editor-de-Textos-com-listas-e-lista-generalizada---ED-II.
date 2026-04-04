@@ -4,6 +4,38 @@
 #include <stdio.h>
 #include "structs.h"
 
+void imprimirEditor(DescLinhas *d, Cursor *c) {
+    if (d != NULL && d->inicio != NULL) {
+        Linha *lin = d->inicio;
+
+        while (lin != NULL) {
+            Letra *let = lin->inicioL;
+
+            // Cursor no início da linha
+            if (lin == c->linha && c->letra == NULL) {
+                printf("|");
+            }
+
+            while (let != NULL) {
+                printf("%c", let->letra);
+
+                // Cursor depois dessa letra
+                if (lin == c->linha && c->letra == let) {
+                    printf("|");
+                }
+
+                let = let->prox;
+            }
+
+            printf("\n");
+            lin = lin->botton;
+        }
+    } else {
+        printf("Editor sem conteudo.\n");
+    }
+}
+
+/*
 void imprimirEditor(DescLinhas *d) {
     if (d != NULL && d->inicio != NULL) {
         Linha *lin = d->inicio;
@@ -19,7 +51,7 @@ void imprimirEditor(DescLinhas *d) {
     } else {
         printf("Editor sem conteudo.\n");
     }
-}
+}*/
 
 // Formatacao do F5 (para haver recuo(modificacao na estrutura do DescLinhas))
 void exibirFormatado(DescLinhas *d) {
