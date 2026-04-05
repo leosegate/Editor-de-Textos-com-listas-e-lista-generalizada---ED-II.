@@ -6,13 +6,19 @@
 #include "structs.h"
 #include "funcoes.h"
 
+//insert
 DescLinhas* criarDescritor() {
     DescLinhas *d = (DescLinhas*)malloc(sizeof(DescLinhas));
     if (d != NULL) {
-        d->alturaTela = 25; // ou 25 dependendo do terminal
+    	d->dicionario = NULL;
+		d->palavraAtual[0] = '\0';
+		d->negritoAtivo = 0;
+		
+        d->alturaTela = 21; 
         d->inicio = NULL;
         d->linhaTopoTela = d->inicio;
         d->qntdLinhas = 0;
+        d->modoInsert = 1; // Começa inserindo por padrao
     }
     return d;
 }
@@ -70,5 +76,6 @@ void salvarArquivoTXT(const char *nomeArquivo, DescLinhas *d) {
         }
     }
 }
+
 
 #endif

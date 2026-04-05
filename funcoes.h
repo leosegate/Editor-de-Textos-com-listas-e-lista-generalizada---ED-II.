@@ -4,8 +4,10 @@
 #include <stdlib.h>
 #include "structs.h"
 
-// --- Limpeza de Memï¿½ria ---
-
+// ta conflicando (n sei pq)
+void inserirPalavraAuto(NoPalavra **raiz, char *palavra);
+void buscarSugestao(NoPalavra *raiz, char *prefixo, char *sugestao);
+// --- Limpeza de Memoria---
 void freeLetras(Linha* L) {
     if (L != NULL) {
         Letra *aux = L->inicioL;
@@ -40,7 +42,7 @@ void freeAll(DescLinhas** d) {
     }
 }
 
-// --- Criaï¿½ï¿½o e Inserï¿½ï¿½o ---
+// --- Criacao e insercao ---
 
 Linha* linhaEmBranco() {
     Linha *nova = (Linha*)malloc(sizeof(Linha));
@@ -148,8 +150,7 @@ void digitarCaractere(DescLinhas *d, char c) {
         // 3. Insere a letra na linha (seja na antiga ou na nova criada)
         if (atual != NULL) {
             inserirLetra(atual, c);
-            // O PDF diz que se a palavra nao couber, ela deve ir para baixo.
-            // Por enquanto, inserimos caractere a caractere conforme a digitacao do usuario.
+           
         }
     }
 }
@@ -215,7 +216,7 @@ void apagarUltimoCaractere(DescLinhas *d) {
         }
     }
 }
-// --- Lista Generalizada (Auto-completar) --- 		mexi aqui ainda n
+// --- Lista Generalizada (Auto-completar) --- 	mexidov
 
 NoPalavra* criarNoPalavra(char c) {
     NoPalavra *novo = (NoPalavra*)malloc(sizeof(NoPalavra));
@@ -356,7 +357,145 @@ void quebrarLinha(Cursor *c, DescLinhas *d) {
     c->letra = NULL;
     c->col = 0;
 }
+//QUEBRA DE LINHAS (79 CARACTERE)
+void realizarQuebraAutomatica(DescLinhas *d, Cursor *c) {
+    if (c->linha->nro >= 79) {
+        Letra *aux = c->linha->inicioL;
+        Letra *ultimoEspaco = NULL;
+        
+        // Busca o ultimo espaço na linha atual
+        while (aux != NULL) {
+            if (aux->letra == ' ') {
+                ultimoEspaco = aux;
+            }
+            aux = aux->prox;
+        }
 
+        // Se houver um espaço, separa
+        if (ultimoEspaco != NULL) {
+            // Salva a posicao antiga para ajustar o cursor depois
+            Letra *letraAntiga = c->letra;
+            
+            // Move o cursor para o espaco para usar a quebrarLinha
+            c->letra = ultimoEspaco;
+            quebrarLinha(c, d);
+            
+            // Remove o espaço que ficou sobrando no final da linha de cima
+            removerChar(c); 
+        } else {
+            // Se for palavra gigante sem espaços, quebra no caractere atual
+            quebrarLinha(c, d);
+        }
+    }
+}
+
+// EXIBICAO LINHAS (MAIN)
+int obterLinhaAtual(DescLinhas *d, Cursor *c) {
+    int cont = 1;
+    Linha *aux = d->inicio;
+    
+    while (aux != NULL && aux != c->linha) {
+        aux = aux->botton;
+        cont++;
+    }
+    
+    return cont;
+}
+
+
+// IR PARA INICIO [HOME]
+void moverHome(Cursor *c) {
+    if (c != NULL) {
+        if (c->linha != NULL) {
+            c->letra = NULL;
+            c->col = 0;
+        }
+    }
+}
+// IR PARA FIM [END]
+void moverEnd(Cursor *c) {
+    if (c != NULL) {
+        if (c->linha != NULL) {
+            Letra *aux = c->linha->inicioL;
+            int contador = 0;
+
+            if (aux != NULL) {
+                while (aux->prox != NULL) {
+                    aux = aux->prox;
+                    contador++;
+                }
+                c->letra = aux;
+                c->col = contador + 1;
+            }
+            else {
+                c->letra = NULL;
+                c->col = 0;
+            }
+        }
+    }
+}
+// DELETE [DEL]
+void removerSobCursor(Cursor *c) {
+    if (c != NULL) {
+        if (c->linha != NULL) {
+            Letra *remover = NULL;
+
+            if (c->letra == NULL) {
+                if (c->linha->inicioL != NULL) {
+                    remover = c->linha->inicioL;
+                    c->linha->inicioL = remover->prox;
+                    
+                    if (remover->prox != NULL) {
+                        remover->prox->ant = NULL;
+                    }
+                    
+                    free(remover);
+                    c->linha->nro--;
+                }
+            }
+            // Se o cursor estiver sobre uma letra, o DEL apaga a letra a DIREITA (prox)
+            else {
+                if (c->letra->prox != NULL) {
+                    remover = c->letra->prox;
+                    c->letra->prox = remover->prox;
+                    
+                    if (remover->prox != NULL) {
+                        remover->prox->ant = c->letra;
+                    }
+                    
+                    free(remover);
+                    c->linha->nro--;
+                }
+            }
+        }
+    }
+}
+//INSERT [INS]	
+void gerenciarDigitacao(DescLinhas *d, Cursor *cursor, char ch) {
+  //adiciona no buffer oq ta sendo usado
+    if (ch != ' ' && ch != '.' && ch != ',' && ch != '?' && ch != '!' && ch != (char)13) {
+        int tam = strlen(d->palavraAtual);
+        if (tam < 79) {
+            d->palavraAtual[tam] = ch;
+            d->palavraAtual[tam + 1] = '\0';
+        }
+    } 
+    // 2. Se for espaco, enter ou pontuacao. a palavra terminou
+    else {
+        if (strlen(d->palavraAtual) > 2) {
+            inserirPalavraAuto(&(d->dicionario), d->palavraAtual);
+        }
+        d->palavraAtual[0] = '\0'; // Limpa para a prox palavra
+    }
+
+    // Insercao normal no texto
+    inserirChar(cursor, ch);
+    
+    // quebra linha
+    if (cursor->linha->nro >= 79) {
+        realizarQuebraAutomatica(d, cursor);
+    }
+}
 void scrollUp(DescLinhas *d, Cursor *c) {
     int i = 0;
 
@@ -439,5 +578,72 @@ void moverBaixo(Cursor *c) {
     c->letra = irParaColuna(c->linha, c->col);
 }
 
+
+void inserirPalavraAuto(NoPalavra **raiz, char *palavra) {
+    if (palavra != NULL && palavra[0] != '\0') {
+        //no null. cria letra
+        if (*raiz == NULL) {
+            *raiz = criarNoPalavra(palavra[0]);
+        }
+
+        // Se a letra do no == a letra da palavra
+        if ((*raiz)->letra == palavra[0]) {
+            // Se for a ultima letra da palavra, marca como final (T)
+            if (palavra[1] == '\0') {
+                (*raiz)->final = 1; 
+            } else {
+                // se n for. continua inserindo a prox letra para baixo (prim)
+                inserirPalavraAuto(&((*raiz)->prim), &palavra[1]); 
+	            }
+        } else {
+            // Se a letra e diferente, tenta inserir para a direita (prox)
+            inserirPalavraAuto(&((*raiz)->prox), palavra); 
+        }
+    }
+}
+
+void buscarSugestao(NoPalavra *raiz, char *prefixo, char *sugestao) {
+    NoPalavra *aux = raiz;
+    int i = 0;
+    sugestao[0] = '\0';
+
+    // 1. Navega ate o final digitado pelo usuario
+    while (prefixo[i] != '\0' && aux != NULL) {
+        while (aux != NULL && aux->letra != prefixo[i]) {
+            aux = aux->prox;
+        }
+        if (aux != NULL) {
+            if (prefixo[i+1] != '\0') {
+                aux = aux->prim;
+            }
+            i++;
+        }
+    }
+
+    // 2. Se achou algo, verifica se o caminho eh UNICO (sem prox)
+    if (aux != NULL && aux->prim != NULL) {
+        NoPalavra *filho = aux->prim;
+
+        if (filho->prox == NULL) {
+            int k = 0;
+            // Copia o que ja foi digitado
+            while (k < i) {
+                sugestao[k] = prefixo[k];
+                k++;
+            }
+
+            // Segue o caminho unico para baixo ate o fim 
+            while (filho != NULL && filho->prox == NULL) {
+                sugestao[k++] = filho->letra;
+                if (filho->final == 1) {
+                    filho = NULL; // Achou o fim da palavra (T)
+                } else {
+                    filho = filho->prim;
+                }
+            }
+            sugestao[k] = '\0';
+        }
+    }
+}
 
 #endif

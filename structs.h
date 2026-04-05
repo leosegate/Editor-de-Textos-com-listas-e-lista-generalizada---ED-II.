@@ -17,9 +17,13 @@ typedef struct descritor_editor {
     Linha *linhaTopoTela;
     int alturaTela;
     int qntdLinhas;
-    int primLinha;   // use: 15 espa�os
-    int recuoEsq;    // use: 5 espa�os
-    int recuoDir;    // use: 75 (limite da coluna)
+    int primLinha;   // use: 15 espacamento (F5)
+    int recuoEsq;    // use: 5 espacamento (F5)
+    int recuoDir;    // use: 75 (limite da coluna) (F5)
+    int modoInsert; // 1: Inserir, 0: Sobrescrever (usando para INSERT)
+    int negritoAtivo;// 1 para Ligado, 0 para Desligado (visual no main)
+    struct noPalavra *dicionario; //usado para auto completar
+    char palavraAtual[80];	//usado para auto completar
 } DescLinhas;
 
 typedef struct noPalavra {

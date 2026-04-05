@@ -7,34 +7,48 @@
 void imprimirEditor(DescLinhas *d, Cursor *c) {
     if (d == NULL || d->linhaTopoTela == NULL) {
         printf("Editor vazio\n");
-        return;
-    }
+    } else {
+        Linha *lin = d->linhaTopoTela;
+        int count = 0;
+        int modoNegritoLocal = 0;
 
-    Linha *lin = d->linhaTopoTela;
-    int count = 0;
+        while (lin != NULL && count < d->alturaTela) {
+            Letra *let = lin->inicioL;
 
-    while (lin != NULL && count < d->alturaTela) {
-        Letra *let = lin->inicioL;
-
-        // cursor no início
-        if (lin == c->linha && c->letra == NULL) {
-            printf("|");
-        }
-
-        while (let != NULL) {
-            printf("%c", let->letra);
-
-            if (lin == c->linha && c->letra == let) {
+            if (lin == c->linha && c->letra == NULL) {
                 printf("|");
             }
 
-            let = let->prox;
+            while (let != NULL) {
+                if (let->letra == (char)21) {
+                    if (modoNegritoLocal == 0) {
+                        modoNegritoLocal = 1;
+                        textcolor(YELLOW); // Cor para identificar que o negrito come�ou
+                    } else {
+                        modoNegritoLocal = 0;
+                        textcolor(WHITE); // Volta ao normal
+                    }
+                } else {
+                    printf("%c", let->letra);
+                }
+
+                if (lin == c->linha && c->letra == let) {
+                    int corAtual = (modoNegritoLocal == 1) ? YELLOW : WHITE;
+                    textcolor(LIGHTCYAN); // Cor do cursor
+                    printf("|");
+                    textcolor(corAtual);
+                }
+
+                let = let->prox;
+            }
+            printf("\n");
+            
+            modoNegritoLocal = 0; 
+            textcolor(WHITE);
+            
+            lin = lin->botton;
+            count++;
         }
-
-        printf("\n");
-
-        lin = lin->botton;
-        count++;
     }
 }
 
@@ -46,7 +60,7 @@ void imprimirEditor(DescLinhas *d, Cursor *c) {
         while (lin != NULL) {
             Letra *let = lin->inicioL;
 
-            // Cursor no início da linha
+            // Cursor no inicio da linha
             if (lin == c->linha && c->letra == NULL) {
                 printf("|");
             }
@@ -98,7 +112,7 @@ void exibirFormatado(DescLinhas *d) {
         while (lin != NULL) {
             Letra *let = lin->inicioL;
             Letra *ultima = NULL;
-            int colAtual = 0; // Come�amos a contar do zero em cada linha
+            int colAtual = 0; // Comecamos a contar do zero em cada linha
 
             // 1. Recuo Esquerdo base para todas as linhas 
             for (i = 0; i < d->recuoEsq; i++) {
@@ -106,7 +120,7 @@ void exibirFormatado(DescLinhas *d) {
                 colAtual++;
             }
 
-            // 2. Recuo extra apenas se for in�cio de par�grafo 
+            // 2. Recuo extra apenas se for inicio de paragrafo 
             if (novoParagrafo == 1) {
                 for (i = 0; i < d->primLinha; i++) {
                     printf(" ");
@@ -124,7 +138,7 @@ void exibirFormatado(DescLinhas *d) {
             }
             printf("\n");
 
-            // 4. Verifica pontua��o para definir o pr�ximo paragrafo 
+            // 4. Verifica pontuacao para definir o prox paragrafo 
             if (ultima != NULL) {
                 if (ultima->letra == '.' || ultima->letra == '!' || ultima->letra == '?') {
                     novoParagrafo = 1;
