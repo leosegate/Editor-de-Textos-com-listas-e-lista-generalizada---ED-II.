@@ -357,6 +357,32 @@ void quebrarLinha(Cursor *c, DescLinhas *d) {
     c->col = 0;
 }
 
+void scrollUp(DescLinhas *d, Cursor *c) {
+    int i = 0;
+
+    while (i < d->alturaTela && d->linhaTopoTela->top != NULL) {
+        d->linhaTopoTela = d->linhaTopoTela->top;
+        i++;
+    }
+
+    // Ajusta cursor
+    c->linha = d->linhaTopoTela;
+    c->letra = NULL;
+}
+
+void scrollDown(DescLinhas *d, Cursor *c) {
+    int i = 0;
+
+    while (i < d->alturaTela && d->linhaTopoTela->botton != NULL) {
+        d->linhaTopoTela = d->linhaTopoTela->botton;
+        i++;
+    }
+
+    // Ajusta cursor
+    c->linha = d->linhaTopoTela;
+    c->letra = NULL;
+}
+
 void moverEsquerda(Cursor *c) {
     if (c->letra != NULL) {
         c->letra = c->letra->ant;

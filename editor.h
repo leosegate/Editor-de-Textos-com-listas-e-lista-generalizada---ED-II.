@@ -5,6 +5,41 @@
 #include "structs.h"
 
 void imprimirEditor(DescLinhas *d, Cursor *c) {
+    if (d == NULL || d->linhaTopoTela == NULL) {
+        printf("Editor vazio\n");
+        return;
+    }
+
+    Linha *lin = d->linhaTopoTela;
+    int count = 0;
+
+    while (lin != NULL && count < d->alturaTela) {
+        Letra *let = lin->inicioL;
+
+        // cursor no início
+        if (lin == c->linha && c->letra == NULL) {
+            printf("|");
+        }
+
+        while (let != NULL) {
+            printf("%c", let->letra);
+
+            if (lin == c->linha && c->letra == let) {
+                printf("|");
+            }
+
+            let = let->prox;
+        }
+
+        printf("\n");
+
+        lin = lin->botton;
+        count++;
+    }
+}
+
+/*
+void imprimirEditor(DescLinhas *d, Cursor *c) {
     if (d != NULL && d->inicio != NULL) {
         Linha *lin = d->inicio;
 
@@ -35,7 +70,7 @@ void imprimirEditor(DescLinhas *d, Cursor *c) {
     }
 }
 
-/*
+
 void imprimirEditor(DescLinhas *d) {
     if (d != NULL && d->inicio != NULL) {
         Linha *lin = d->inicio;

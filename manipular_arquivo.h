@@ -9,7 +9,9 @@
 DescLinhas* criarDescritor() {
     DescLinhas *d = (DescLinhas*)malloc(sizeof(DescLinhas));
     if (d != NULL) {
+        d->alturaTela = 25; // ou 25 dependendo do terminal
         d->inicio = NULL;
+        d->linhaTopoTela = d->inicio;
         d->qntdLinhas = 0;
     }
     return d;

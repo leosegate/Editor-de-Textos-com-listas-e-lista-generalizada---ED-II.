@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <conio.h>
+#include <conio2.h>
 #include <windows.h>
 #include "structs.h"
 #include "funcoes.h"
@@ -28,7 +28,7 @@ void escolha(int tecla, DescLinhas **d, Cursor *cursor) {
         if (temp != NULL) {
             free(*d);
             *d = temp;
-
+            (*d)->linhaTopoTela = (*d)->inicio;
             resetarCursor(cursor, *d);
 
             printf("\nArquivo carregado com sucesso!");
@@ -84,6 +84,13 @@ void escolha(int tecla, DescLinhas **d, Cursor *cursor) {
 int main() {
     DescLinhas *meuEditor = criarDescritor();
     Cursor cursor;
+	/*
+    printf("DEBUG:\n");
+    printf("inicio: %p\n", meuEditor->inicio);
+    printf("topo: %p\n", meuEditor->linhaTopoTela);
+    printf("cursor linha: %p\n", cursor.linha);
+
+    getch();*/
 
     int tecla = 0;
     int continuar = 1;
@@ -100,6 +107,9 @@ int main() {
             printf("--- EDITOR DE TEXTO (FIPP) ---\n");
             printf("| F2: Abrir | F3: Salvar | F4: Sair | F5: Exibir | F10: Negrito |\n");
             printf("-----------------------------------------------------------------\n");
+
+            gotoxy(1,29), printf("-----------------------------------------------------------------");
+            gotoxy(1,4);
 
             imprimirEditor(meuEditor, &cursor);
 
@@ -128,6 +138,14 @@ int main() {
 
                     case 62: // F4
                         continuar = 0;
+                        break;
+
+                    case 73: // Page Up
+                        scrollUp(meuEditor, &cursor);
+                        break;
+
+                    case 81: // Page Down
+                        scrollDown(meuEditor, &cursor);
                         break;
 
                     default:

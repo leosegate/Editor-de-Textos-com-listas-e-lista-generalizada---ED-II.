@@ -14,6 +14,8 @@ typedef struct linha {
 
 typedef struct descritor_editor {
     Linha *inicio;
+    Linha *linhaTopoTela;
+    int alturaTela;
     int qntdLinhas;
     int primLinha;   // use: 15 espa�os
     int recuoEsq;    // use: 5 espa�os
